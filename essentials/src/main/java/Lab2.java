@@ -19,14 +19,14 @@ import com.hazelcast.jet.JetInstance;
 import com.hazelcast.jet.Observable;
 import com.hazelcast.jet.pipeline.Pipeline;
 import com.hazelcast.jet.pipeline.Sinks;
+import com.hazelcast.jet.pipeline.Sources;
 import com.hazelcast.jet.pipeline.StreamSource;
-import com.hazelcast.jet.pipeline.test.TestSources;
 
 public class Lab2 {
 
     private static final String MY_JOB_RESULTS = "my_job_results";
 
-    public static void main (String[] args) {
+    public static void main(String[] args) {
         Pipeline p = buildPipeline();
 
         JetInstance jet = Jet.bootstrappedInstance();
@@ -44,19 +44,29 @@ public class Lab2 {
     private static Pipeline buildPipeline() {
         Pipeline p = Pipeline.create();
 
+        /* Before:
         StreamSource<Long> source = TestSources.itemStream(1, (ts, seq) -> seq);
 
         p.readFrom(source)
-         .withoutTimestamps()
-         .writeTo(Sinks.observable(MY_JOB_RESULTS));
+                .withoutTimestamps()
+                .writeTo(Sinks.observable(MY_JOB_RESULTS));
+        */
 
         // STEP 1: Filter out odd numbers from the stream
 
         // Add filter() to  your pipeline
         // - Use lambda to define the predicate
 
-        // Stop the job before continuing to Step 2
+        /* After Step 1:
+        StreamSource<Long> source = TestSources.itemStream(1, (ts, seq) -> seq);
 
+        p.readFrom(source)
+                .withoutTimestamps()
+                .filter(item -> item % 2 == 0)
+                .writeTo(Sinks.observable(MY_JOB_RESULTS));
+         */
+
+        // Stop the job before continuing to Step 2
 
 
         // STEP 2: Process data from a file instead of generated data
@@ -75,6 +85,14 @@ public class Lab2 {
         //
         // echo "0" >> input.txt
         // echo "1" >> input.txt
+
+        StreamSource<String> source = Sources.fileWatcher("data/");
+
+        p.readFrom(source)
+                .withoutTimestamps()
+                .map(Long::valueOf)
+                .filter(item -> item % 2 == 0)
+                .writeTo(Sinks.observable(MY_JOB_RESULTS));
 
         // Stop the job
 

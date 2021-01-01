@@ -9,13 +9,11 @@ public class TradeListener implements EntryListener<String, Trade> {
 
     @Override
     public void entryAdded(EntryEvent<String, Trade> event) {
-
         System.out.println("New symbol " + event.getKey() + ", price: " + event.getValue().getPrice());
     }
 
     @Override
     public void entryUpdated(EntryEvent<String, Trade> event) {
-
         System.out.println("Symbol updated " + event.getKey() + ", price: " + event.getValue().getPrice());
     }
 

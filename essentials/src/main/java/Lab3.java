@@ -24,9 +24,9 @@ import sources.TradeSource;
 
 public class Lab3 {
 
-    private static final String LATEST_TRADES_PER_SYMBOL = "trades" ;
+    private static final String LATEST_TRADES_PER_SYMBOL = "trades";
 
-    public static void main (String[] args) {
+    public static void main(String[] args) {
         JetInstance jet = Jet.bootstrappedInstance();
 
         // Subscribe for map events
@@ -42,19 +42,27 @@ public class Lab3 {
 
     private static Pipeline buildPipeline() {
 
+        /* Before:
         Pipeline p = Pipeline.create();
 
         p.readFrom(TradeSource.tradeSource())
          .withNativeTimestamps(0);
+         */
 
-         // Transform Trade events to  map entries with
-         // the Trade symbol as the key and the trade itself as a value
-         // Use Util.entry as an implementation of java.util.Map.Entry
+        // Transform Trade events to  map entries with
+        // the Trade symbol as the key and the trade itself as a value
+        // Use Util.entry as an implementation of java.util.Map.Entry
 
-         // .map(trade -> Util.entry( , ))
+        // .map(trade -> Util.entry( , ))
 
-         // Write the entry stream to LATEST_TRADES_PER_SYMBOL map
+        // Write the entry stream to LATEST_TRADES_PER_SYMBOL map
 
+        Pipeline p = Pipeline.create();
+
+        p.readFrom(TradeSource.tradeSource())
+                .withNativeTimestamps(0)
+                .map(trade -> Util.entry(trade.getSymbol(), trade))
+                .writeTo(Sinks.map(LATEST_TRADES_PER_SYMBOL));
 
         return p;
         // Stop the job

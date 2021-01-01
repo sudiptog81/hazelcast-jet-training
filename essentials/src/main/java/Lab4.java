@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import com.hazelcast.map.IMap;
 import com.hazelcast.jet.Jet;
 import com.hazelcast.jet.JetInstance;
 import com.hazelcast.jet.pipeline.Pipeline;
 import com.hazelcast.jet.pipeline.Sinks;
+import com.hazelcast.map.IMap;
 import dto.EnrichedTrade;
 import dto.Trade;
 import sources.TradeSource;
@@ -50,14 +50,15 @@ public class Lab4 {
         Pipeline p = Pipeline.create();
 
         p.readFrom(TradeSource.tradeSource())
-         .withoutTimestamps()
+                .withoutTimestamps()
 
-        // Convert Trade stream to EnrichedTrade stream
-        // - Trade (dto.Trade) has a symbol field
-        // - Use LOOKUP_TABLE to look up full company name based on the symbol
-        // - Create new Enriched Trade (dto.EnrichedTrade) using Trade and company name
+                // Convert Trade stream to EnrichedTrade stream
+                // - Trade (dto.Trade) has a symbol field
+                // - Use LOOKUP_TABLE to look up full company name based on the symbol
+                // - Create new Enriched Trade (dto.EnrichedTrade) using Trade and company name
+                .mapUsingIMap(lookupTable, Trade::getSymbol, EnrichedTrade::new)
 
-        .writeTo(Sinks.logger());
+                .writeTo(Sinks.logger());
 
         return p;
     }

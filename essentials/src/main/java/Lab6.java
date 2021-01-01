@@ -20,7 +20,6 @@ import com.hazelcast.jet.Job;
 import com.hazelcast.jet.accumulator.LongAccumulator;
 import com.hazelcast.jet.pipeline.Pipeline;
 import com.hazelcast.jet.pipeline.Sinks;
-import dto.Trade;
 import sources.TradeSource;
 
 public class Lab6 {
@@ -42,15 +41,24 @@ public class Lab6 {
         Pipeline p = Pipeline.create();
 
         p.readFrom(TradeSource.tradeSource(1))
-          .withNativeTimestamps(0 )
+                .withNativeTimestamps(0)
 
-         // Detect if price between two consecutive trades drops by more than 200
+                // Detect if price between two consecutive trades drops by more than 200
 
-         // Use the mapStateful to keep price of previous Trade
-         // - Consider using com.hazelcast.jet.accumulator.LongAccumulator as a mutable container for long values
-         // - Return the price difference if drop is detected, nothing otherwise
+                // Use the mapStateful to keep price of previous Trade
+                // - Consider using com.hazelcast.jet.accumulator.LongAccumulator as a mutable container for long values
+                // - Return the price difference if drop is detected, nothing otherwise
 
-         .writeTo(Sinks.logger( m -> "Price drop: " + m));
+                .mapStateful(
+                        LongAccumulator::new,
+                        (previous, current) -> {
+                            Long diff = previous.get() - current.getPrice();
+                            previous.set(current.getPrice());
+                            return diff > 200 ? diff : null;
+                        }
+                )
+
+                .writeTo(Sinks.logger(m -> "Price drop: " + m));
 
         return p;
     }
